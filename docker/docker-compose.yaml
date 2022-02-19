@@ -1,0 +1,29 @@
+version: '3.4'
+
+services:
+
+  local:
+    stdin_open: true
+    tty: true
+    image: dleongsh/nemo_asr:v1.6.2
+    runtime: nvidia
+    environment:
+      NVIDIA_VISIBLE_DEVICES: 0
+    volumes:
+      - /home/daniel/projects/nemo_sslr:/nemo_asr:z
+      - /home/daniel/datasets/nsc:/datasets:z
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    shm_size: 16gb
+    command: python3 local_train.py
+
+  tensorboard:
+    stdin_open: true
+    tty: true
+    image: nemo_asr:v1.6.2
+    ports:
+      - 6006:6006
+    volumes:
+      - /home/daniel/projects/nemo_sslr/logs:/logs
+    command: tensorboard --logdir /logs --host 0.0.0.0 --port 6006
