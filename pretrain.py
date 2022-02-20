@@ -13,13 +13,13 @@
 # limitations under the License.
 from clearml import Task, Dataset
 
-task = Task.init(project_name='nemo_sslr', task_name='conformer_large_pretrain_id_only', output_uri='s3://experiment-logging/storage', task_type='training')
+task = Task.init(project_name='nemo_sslr', task_name='conformer_large_pretrain_id_ms', output_uri='s3://experiment-logging/storage', task_type='training')
 task.add_tags(['NeMo Toolkit', 'Pretraining', 'ASR', 'Voxlingua'])
 task.set_base_docker('dleongsh/nemo_asr:v1.6.2')
 task.execute_remotely(queue_name='compute', clone=False, exit_process=True)
 
 import os
-from utils import update_manifest
+from utils import update_manifest_from_json
 import pytorch_lightning as pl
 from omegaconf import OmegaConf
 
@@ -54,19 +54,25 @@ When doing supervised fine-tuning from unsupervised pre-trained encoder, set fla
 """
 
 
-@hydra_runner(config_path="./configs", config_name="id_sslr")
+@hydra_runner(config_path="./configs", config_name="id_ms_sslr")
 def main(cfg):
     logging.info(f"Hydra config: {OmegaConf.to_yaml(cfg)}")
 
     # download data
-    dataset = Dataset.get(dataset_project=cfg.s3.dataset_project, dataset_name=cfg.s3.dataset_name)
-    dataset_path = train_data.get_local_copy()
-    cfg.model.train_ds.manifest_filepath = update_manifest(os.path.join(dataset_path, 'train_manifest.json'))
-    cfg.model.dev_ds.manifest_filepath = update_manifest(os.path.join(dataset_path, 'dev_manifest.json'))
+    train_manifest_paths = []
+    validation_manifest_paths = []
+    for dataset_name in cfg.s3.dataset_name:
+        dataset = Dataset.get(dataset_project=cfg.s3.dataset_project, dataset_name=dataset_name)
+        dataset_path = dataset.get_local_copy()
+        train_manifest_paths.append(
+            update_manifest_from_json(os.path.join(dataset_path, 'train_manifest.json'))
+            )
+        validation_manifest_paths.append(
+            update_manifest_from_json(os.path.join(dataset_path, 'dev_manifest.json'))
+            )
 
-    print('Generated updated manifests at:')
-    print('train manifest:', cfg.model.train_ds.manifest_filepath)
-    print('valid manifest:', cfg.model.validation_ds.manifest_filepath)
+    cfg.model.train_ds.manifest_filepath = ','.join(train_manifest_paths)
+    cfg.model.validation_ds.manifest_filepath = ','.join(validation_manifest_paths)
 
     trainer = pl.Trainer(**cfg.trainer)
     exp_manager(trainer, cfg.get("exp_manager", None))

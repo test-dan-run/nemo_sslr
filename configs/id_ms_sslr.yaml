@@ -4,6 +4,7 @@ s3:
   dataset_project: "datasets/voxlingua"
   dataset_names: 
     - "indonesian"
+    - "malay"
   label_file_type: json
 
 model:
