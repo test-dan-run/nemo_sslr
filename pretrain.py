@@ -61,13 +61,17 @@ def main(cfg):
     # download data
     train_manifest_paths = []
     validation_manifest_paths = []
-    for dataset_name in cfg.s3.dataset_name:
+    for dataset_name in cfg.s3.dataset_names:
         dataset = Dataset.get(dataset_project=cfg.s3.dataset_project, dataset_name=dataset_name)
         dataset_path = dataset.get_local_copy()
         train_manifest_paths.append(
+            # updates the audio_filepaths in the manifest to the remote's full path to each audio file
+            # outputs the updated path to train_manifest.json 
             update_manifest_from_json(os.path.join(dataset_path, 'train_manifest.json'))
             )
         validation_manifest_paths.append(
+            # updates the audio_filepaths in the manifest to the remote's full path to each audio file
+            # outputs the updated path to dev_manifest.json 
             update_manifest_from_json(os.path.join(dataset_path, 'dev_manifest.json'))
             )
 
