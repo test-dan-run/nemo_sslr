@@ -13,7 +13,7 @@
 # limitations under the License.
 from clearml import Task, Dataset
 
-task = Task.init(project_name='nemo_sslr', task_name='conformer_large_pretrain_id_ms', output_uri='s3://experiment-logging/storage', task_type='training')
+task = Task.init(project_name='nemo_sslr', task_name='conformer_large_pretrain_id_only_SuperHighLR', output_uri='s3://experiment-logging/storage', task_type='training')
 task.add_tags(['NeMo Toolkit', 'Pretraining', 'ASR', 'Voxlingua'])
 task.set_base_docker('dleongsh/nemo_asr:v1.6.2')
 task.execute_remotely(queue_name='compute', clone=False, exit_process=True)
@@ -54,7 +54,7 @@ When doing supervised fine-tuning from unsupervised pre-trained encoder, set fla
 """
 
 
-@hydra_runner(config_path="./configs", config_name="id_ms_sslr")
+@hydra_runner(config_path="./configs", config_name="id_sslr")
 def main(cfg):
     logging.info(f"Hydra config: {OmegaConf.to_yaml(cfg)}")
 
