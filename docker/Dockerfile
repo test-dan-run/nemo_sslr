@@ -18,7 +18,7 @@ ENV PYTHONUNBUFFERED 1
 
 # Install pip requirements
 RUN python3 -m pip install --upgrade pip && python3 -m pip install --no-cache-dir Cython clearml boto3
-RUN python3 -m pip install git+https://github.com/NVIDIA/NeMo.git@r1.6.2#egg=nemo_toolkit[all]
+RUN python3 -m pip install git+https://github.com/NVIDIA/NeMo.git@main#egg=nemo_toolkit[all]
 RUN rm /opt/conda/pip.conf /root/.config/pip/pip.conf /root/.pip/pip.conf /etc/xdg/pip/pip.conf
 
 #docker container starts with bash
